@@ -1,36 +1,47 @@
+# This assumes waypolygons have methods:
+#   neighbors()
+#   mark()
+#   marked?()
+#   ==()
+# Also WayPath must implement a distance between waypolygons
+#   wp_distance()
 class WayPath
 
-  attr_accessor :waypolygon_start, :waypolygon_end
-  attr_accessor :steps
+  attr_accessor :starting_point, :final_point
 
-  def initialize(waypolygon_start, waypolygon_end = nil)
-    @waypolygon_start = waypolygon_start
-    @waypolygon_end = waypolygon_end
-    @steps = [waypolygon_start]
+  def initialize(starting_point, final_point = nil)
+    @starting_point = starting_point
+    @final_point = final_point
   end
 
-  def start
-    @waypolygon_start
+  def steps
+    search([starting_point],final_point)
   end
 
-  def end
-    @waypolygon_end
-  end
+  private
 
-  def path
-    if steps.last.adjacent?(waypolygon_end)
-      steps << waypolygon_end
-      return steps
-    else
-      steps << next_step
+  # Usage: puts search([start], final_point)
+  def search(path, final_point)
+
+    current = path.first
+
+    if current == final_point
+      puts "found"
+      return path.reverse
+    end
+
+    neighbors = current.neighbors
+    neighbors = neighbors.reject{ |candidate| candidate.marked? }
+    neighbors = neighbors.sort{ |a, b| wp_distance(a,final_point) <=> wp_distance(b,final_point) }
+
+    neighbors.each do |child|
+      search(path.unshift(child), final_point)
+      child.mark
     end
   end
 
-  def adjacent?(waypolygon)
-    true
+  def wp_distance(a,b)
+    raise 'Not yet implemented'
   end
 
-  def next_step
-    nil
-  end
 end

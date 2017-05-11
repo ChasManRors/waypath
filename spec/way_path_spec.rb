@@ -1,5 +1,8 @@
 require 'way_path'
 
+
+
+
 # Given:
 # When:
 # Then:
@@ -15,9 +18,7 @@ describe 'WayPath' do # => given
   let(:trivial_way_path) {WayPath.new(wp_start, wp_end)}
 
 	context '#initialized' do  # => when
-    # Waypolygon.query(floorplan: Location.last.floorplan.id, campaign: )
     it 'will know its starting waypolygon' do # => then
-binding.pry # => debugger
       expect(trivial_way_path.start).not_to be_nil
     end
 
@@ -28,6 +29,7 @@ binding.pry # => debugger
 
   context 'send path# where the start and end are neighbors' do
     it 'returns the path with the start and end waypolygons' do
+      allow(wp_start).to receive(:adjacent?).with(any_args) { true }
       expect(trivial_way_path.path).to match_array([wp_start,wp_end])
     end
   end
