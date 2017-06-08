@@ -5,14 +5,12 @@ require_relative '../lib/way_path.rb'
 # The following runs but does not terminate.  Try the following instead
 # => Not sure this does what it is suppose to so just add stuff to WAYPOLYGON!
 
-class WpDecorator < SimpleDelegator
+class FakeWaypolygon
 
-  attr_accessor :wp_visited
+  attr_accessor :wp_visited, :center, :wp_adjacents
 
-  def self.wrap(collection)
-    collection.map do |obj|
-      new obj
-    end
+  def initialize(x,y)
+    @center = [x, y]
   end
 
   def wp_mark
@@ -25,45 +23,21 @@ class WpDecorator < SimpleDelegator
 
 end
 
-
 # Expectations, fancy
 describe 'WayPath' do
-  let (:poly1) { double("Waypolygon") }
-  let (:poly2) { double("Waypolygon") }
-  let (:poly3) { double("Waypolygon") }
-  let (:poly4) { double("Waypolygon") }
 
-  let (:naked_adjacents_waypolygons) { [poly2, poly3, poly4] }
-
-  let (:adjacents_waypolygons) {WpDecorator.wrap naked_adjacents_waypolygons}
-
-  let (:unattached_poly1) { double("Waypolygon") }
-  let (:unattached_poly2) { double("Waypolygon") }
-  let (:unattached_poly3) { double("Waypolygon") }
-  let (:unattached_poly4) { double("Waypolygon") }
-  let (:unattached_poly5) { double("Waypolygon") }
-
+  let (:poly1) { FakeWaypolygon.new(0.0, 0.0) }
+  let (:poly2) { FakeWaypolygon.new(2.0, 2.0) }
+  let (:poly3) { FakeWaypolygon.new(3.0, 3.0) }
+  let (:poly4) { FakeWaypolygon.new(4.0, 4.0) }
+  let (:unattached_poly1) { FakeWaypolygon.new(10.0, 10.0) }
+  let (:polys){ [poly1, poly2, poly3, poly4, unattached_poly1] }
+  let (:adjacents_waypolygons) { [poly2, poly3, poly4] }
   let (:way_path1) { WayPath.new(poly1,poly4) }
 
   before(:each) do
-
-    allow(poly1).to receive(:wp_adjacents).and_return adjacents_waypolygons
-
-    allow(poly2).to receive(:wp_adjacents).and_return [poly1]
-    allow(poly3).to receive(:wp_adjacents).and_return [poly1]
-    allow(poly4).to receive(:wp_adjacents).and_return [poly1]
-
-    allow(poly1).to receive(:center).and_return([0.0,0.0])
-    allow(poly2).to receive(:center).and_return([2.0,2.0])
-    allow(poly3).to receive(:center).and_return([3.0,3.0])
-    allow(poly4).to receive(:center).and_return([4.0,4.0])
-
-    allow(poly1).to receive(:wp_visited?).and_return(nil)
-    allow(poly2).to receive(:wp_visited?).and_return(nil)
-    allow(poly3).to receive(:wp_visited?).and_return(nil)
-    allow(poly4).to receive(:wp_visited?).and_return(nil)
-
-    allow(unattached_poly1).to receive(:center).and_return([10.0,10.0])
+    poly1.wp_adjacents = adjacents_waypolygons
+    polys.each{ |p| p.wp_visited = nil }
   end
 
   it 'finds reachable candidates' do
@@ -92,9 +66,8 @@ describe 'WayPath' do
 
   # Usage: puts search([start], final_point)
   it 'returns path to neighbor' do
-    start = WpDecorator.new poly1
     final_point = adjacents_waypolygons.last
-    wp = way_path1.search([start], final_point).map( &:center)
+    wp = way_path1.search([poly1], final_point).map( &:center)
     expect(wp).to match_array([[0.0, 0.0], [4.0, 4.0]])
   end
 
