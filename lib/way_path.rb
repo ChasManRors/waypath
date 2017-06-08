@@ -25,7 +25,7 @@ class WayPath
 
   attr_accessor :starting_point, :final_point
 
-  def initialize(starting_point, final_point = nil)
+  def initialize(starting_point, final_point)
     @starting_point = starting_point
     @final_point = final_point
   end
