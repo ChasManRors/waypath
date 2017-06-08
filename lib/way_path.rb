@@ -34,31 +34,36 @@ class WayPath
     search([starting_point],final_point)
   end
 
+  def pwp(p)
+    [p.center,p.wp_visited?].flatten
+  end
+
   # private
 
   # Usage: puts search([start], final_point)
   def search(path, final_point)
 
     current = path.first
-    puts "current.center = #{current.center}"
-    puts "final_point.center = #{final_point.center}"
-    puts "path.size = #{path.size}"
-    puts "path = #{path.map{ |p| [p.center,p.wp_visited?].flatten }}"
-    puts "current.wp_visited? = #{current.wp_visited?}"
+    #current = path.last
 
-binding.pry # => debugger
+    puts "start #{pwp starting_point} | current #{pwp current} | final #{pwp final_point}"
+    puts "path-size: #{path.size} | steps: #{path.map{ |p| pwp p }}"
 
     if wp_distance2(current, final_point) < 1.0
-      puts "found"
+      current.wp_mark
+      puts "found minimum distance"
       return path.reverse
     end
 
     wp_adjacents = sort_and_filter(current.wp_adjacents, final_point)
 
     wp_adjacents.each do |wp|
-      search(path.unshift(wp), final_point)
-binding.pry # => debugger
+      if final_point.wp_visited?
+        puts "found visited final point"
+        return path.reverse
+      end
       wp.wp_mark
+      search(path.unshift(wp), final_point)
     end
   end
 
@@ -68,6 +73,7 @@ binding.pry # => debugger
   end
 
   def wp_distance2(a,b)
+    # puts a.center.to_s + " " + b.center.to_s
     (b.center[0] - a.center[0])**2 + (b.center[1] - a.center[1])**2
   end
 end

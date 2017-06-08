@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'awesome_print'
 require_relative '../lib/way_path.rb'
 
 # The following runs but does not terminate.  Try the following instead
@@ -78,6 +79,7 @@ describe 'WayPath' do
   end
 
   it 'order reachable candidates' do
+    # final is unattached_poly1.center => [10.0, 10.0]
     array = way_path1.sort_and_filter(adjacents_waypolygons,unattached_poly1)
     expect(array.map(&:center)).to match_array([[4.0, 4.0], [3.0, 3.0], [2.0, 2.0]])
   end
@@ -88,16 +90,12 @@ describe 'WayPath' do
   #   expect(array.map(&:center)).to match_array([[4.0, 4.0], [2.0, 2.0]])
   # end
 
-
   # Usage: puts search([start], final_point)
   it 'returns path to neighbor' do
-
-binding.pry # => debugger
     start = WpDecorator.new poly1
     final_point = adjacents_waypolygons.last
-
-    x =  way_path1.search([start], final_point)
-
+    wp = way_path1.search([start], final_point).map( &:center)
+    expect(wp).to match_array([[0.0, 0.0], [4.0, 4.0]])
   end
 
   xit "move to best unmarked candidate and mark" do
